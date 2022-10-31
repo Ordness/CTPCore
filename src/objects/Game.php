@@ -4,8 +4,18 @@ namespace Ordness\CTP\objects;
 
 final class Game
 {
+    private ?Map $map;
+
     public function __construct(private int $id, private Team $blue, private Team $red)
     {
+    }
+
+    /**
+     * @return Map|null
+     */
+    public function getMap(): ?Map
+    {
+        return $this->map;
     }
 
     /**

@@ -4,7 +4,7 @@ namespace Ordness\CTP\handlers;
 
 use Ordness\CTP\objects\Game;
 
-abstract class GameHandler
+abstract class GamesHandler
 {
     public static array $games = [];
 

@@ -4,7 +4,7 @@ namespace Ordness\CTP\tasks;
 
 use mysqli;
 use Ordness\CTP\Core;
-use Ordness\CTP\handlers\GameHandler;
+use Ordness\CTP\handlers\GamesHandler;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 
@@ -37,16 +37,13 @@ final class CanJoin extends AsyncTask
             Server::getInstance()->getPlayerByPrefix($this->username)?->kick($message);
         } else {
             $query = Core::getInstance()->getDB()->query("SELECT DISTINCT Teams.id_game FROM Players INNER JOIN Teams ON id_team = Teams.id;");
-            $id = isset($query->fetch_all()[0][0]) ? $query->fetch_all()[0][0] : null;
+            $id = $query->fetch_all()[0][0] ?? null;
             if ($id) {
-                $game = GameHandler::getGame($id);
+                $game = GamesHandler::getGame($id);
                 $team_color = Core::getInstance()->getDB()->query("SELECT DISTINCT Teams.color FROM Players INNER JOIN Teams ON id_team = Teams.id;")->fetch_all()[0][0];
-                if ($game) {
-                    $game->addPlayer($team_color, $this->username);
-                    var_dump("$this->username added to game $id ($team_color)");
-                }
+                $game?->addPlayer($team_color, $this->username);
             }
-//            Core::getInstance()->getDB()->query("DELETE FROM Players WHERE username=\"$this->username\";");
+            Core::getInstance()->getDB()->query("DELETE FROM Players WHERE username=\"$this->username\";");
         }
     }
 }
