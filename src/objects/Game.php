@@ -2,12 +2,15 @@
 
 namespace Ordness\CTP\objects;
 
+use Ordness\CTP\handlers\MapsHandler;
+
 final class Game
 {
     private ?Map $map;
 
     public function __construct(private int $id, private Team $blue, private Team $red)
     {
+        $this->map = MapsHandler::getRandomMap();
     }
 
     /**

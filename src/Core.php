@@ -3,6 +3,7 @@
 namespace Ordness\CTP;
 
 use MySQLi;
+use Ordness\CTP\handlers\MapsHandler;
 use Ordness\CTP\listeners\PlayerListener;
 use Ordness\CTP\tasks\GameChecker;
 use pocketmine\plugin\PluginBase;
@@ -19,6 +20,7 @@ class Core extends PluginBase
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
         if($this->getDB()->ping()) $this->initDB();
         $this->getScheduler()->scheduleRepeatingTask(new GameChecker(), 10*20);
+        MapsHandler::loadMaps();
     }
 
     /**
