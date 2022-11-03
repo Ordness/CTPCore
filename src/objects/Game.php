@@ -34,7 +34,7 @@ final class Game
         $this->startTime = time() + 60;
         $this->timeoutTask = new ClosureTask(function (): void {
             if (!$this->started) {
-                if (!$this->showTask->getHandler()->isCancelled()) $this->showTask->getHandler()->cancel();
+                if (!$this->showTask->getHandler()?->isCancelled()) $this->showTask->getHandler()?->cancel();
                 $this->start();
             }
         });
@@ -48,7 +48,7 @@ final class Game
                 } else {
                     if ($this->getCount() >= $this->getCountMax()) {
                         $this->start();
-                        if (!$this->showTask->getHandler()->isCancelled()) $this->showTask->getHandler()->cancel();
+                        if (!$this->showTask->getHandler()?->isCancelled()) $this->showTask->getHandler()?->cancel();
                     } else {
                         $player->sendActionBarMessage(Core::PREFIX . "§cEn attente des joueurs..");
                         $player->sendTip("§fLe §6CTP §fcommence dans §e" . ($this->startTime + 20 - time()) . " secondes§f.");
@@ -144,25 +144,26 @@ final class Game
                 $count === 0 => "§a",
                 default => "§f",
             };
-            $base = $countDown;
-            $countDown -= 1;
             foreach ($this->getPlayers() as $name) {
                 $player = Core::getInstance()->getServer()->getPlayerByPrefix($name);
-                $player?->sendTip(Core::PREFIX . "§6Capture The Point");
-                $player?->sendActionBarMessage("§fDébut de la partie dans {$color($base)}$base secondes§f...");
-                $player?->broadcastSound(new PopSound());
-                if ($countDown === 0) {
+                if ($countDown <= 0) {
                     $player?->broadcastSound(new ExplodeSound());
                     $player?->getWorld()->addParticle($player->getPosition(), new ExplodeParticle());
                     $player?->setImmobile(false);
                     $player?->sendTitle("§aGO !", "§fCapturez les différents §6points §fet accumulez des §epoints §f!");
-                    if (!$this->countDownTask->getHandler()->isCancelled()) $this->countDownTask->getHandler()->cancel();
+                    if (!$this->countDownTask->getHandler()?->isCancelled()) $this->countDownTask->getHandler()?->cancel();
                     $this->onStart();
                 }
+                else {
+                    $player?->sendTip(Core::PREFIX . "§6Capture The Point");
+                    $player?->sendActionBarMessage("§fDébut de la partie dans {$color($countDown)}$countDown secondes§f...");
+                    $player?->broadcastSound(new PopSound());
+                }
             }
+            $countDown -= 1;
         });
         Core::getInstance()->getScheduler()->scheduleRepeatingTask($this->countDownTask, 20);
-        $this->timeoutTask->getHandler()->cancel();
+        $this->timeoutTask->getHandler()?->cancel();
     }
 
     public function onStart(): void

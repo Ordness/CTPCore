@@ -89,7 +89,7 @@ final class Point
     {
         $this->team = null;
         $this->loadingTeam = null;
-        if (!$this->loadTask->getHandler()->isCancelled()) $this->loadTask->getHandler()->cancel();
+        if (!$this->loadTask->getHandler()?->isCancelled()) $this->loadTask->getHandler()?->cancel();
         $this->steps = 0;
         $this->paused = false;
         for ($x = $this->getPosition()->getX() - $this->steps; $x <= $this->getPosition()->getX() + $this->steps; $x++) {

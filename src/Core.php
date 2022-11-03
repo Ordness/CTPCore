@@ -39,4 +39,11 @@ class Core extends PluginBase
         $this->getDB()->query("CREATE TABLE if NOT EXISTS Players(id INTEGER NOT NULL UNIQUE AUTO_INCREMENT, username TEXT NOT NULL UNIQUE, id_team INTEGER NOT NULL,PRIMARY KEY(id),FOREIGN KEY(id_team) REFERENCES Teams(id));");
         $this->getLogger()->notice("Database initialized");
     }
+
+    protected function onDisable(): void
+    {
+        foreach ($this->getServer()->getOnlinePlayers() as $player){
+            $player->transfer("play.nyrok.fr", 19142);
+        }
+    }
 }
