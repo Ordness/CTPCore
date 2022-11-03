@@ -1,1 +1,14 @@
-maps: []
+maps:
+  desert:
+    spawns:
+      red:
+        x: 296
+        y: 3
+        z: 395
+      blue:
+        x: 312
+        y: 6
+        z: 289
+    points:
+      - position: "291:5:355"
+        radius: 2

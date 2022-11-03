@@ -5,6 +5,7 @@ namespace Ordness\CTP\tasks;
 use mysqli;
 use Ordness\CTP\Core;
 use Ordness\CTP\handlers\GamesHandler;
+use pocketmine\color\Color;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 
@@ -27,12 +28,12 @@ final class CanJoin extends AsyncTask
         foreach ($query->fetch_all() as $array) {
             $players[] = $array[0];
         }
-        $this->setResult(!in_array($this->username, $players));
+        $this->setResult(in_array($this->username, $players));
     }
 
     public function onCompletion(): void
     {
-        if ($this->getResult()) {
+        if (!$this->getResult()) {
             $message = Core::PREFIX . "§cVous n'êtes pas autorisé à rejoindre cette partie.";
             Server::getInstance()->getPlayerByPrefix($this->username)?->kick($message);
         } else {
@@ -41,7 +42,12 @@ final class CanJoin extends AsyncTask
             if ($id) {
                 $game = GamesHandler::getGame($id);
                 $team_color = Core::getInstance()->getDB()->query("SELECT DISTINCT Teams.color FROM Players INNER JOIN Teams ON id_team = Teams.id;")->fetch_all()[0][0];
-                $game?->addPlayer($team_color, $this->username);
+                $color = match ($team_color) {
+                    1 => new Color(255, 0, 0),
+                    2 => new Color(0, 0, 255),
+                    default => new Color(255, 255, 255),
+                };
+                $game?->addPlayer($color, $this->username);
             }
             Core::getInstance()->getDB()->query("DELETE FROM Players WHERE username=\"$this->username\";");
         }

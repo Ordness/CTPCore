@@ -16,6 +16,7 @@ class Core extends PluginBase
 
     protected function onEnable(): void
     {
+        $this->saveResource("config.yml", true);
         $this::setInstance($this);
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
         if($this->getDB()->ping()) $this->initDB();
