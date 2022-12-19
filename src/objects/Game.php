@@ -6,6 +6,8 @@ use Ordness\CTP\Core;
 use Ordness\CTP\handlers\GamesHandler;
 use Ordness\CTP\handlers\MapsHandler;
 use pocketmine\color\Color;
+use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\world\particle\ExplodeParticle;
 use pocketmine\world\particle\PotionSplashParticle;
@@ -25,11 +27,11 @@ final class Game
     private ClosureTask $timeoutTask;
     private ClosureTask $countDownTask;
     private bool $started = false;
-    private ClosureTask $gameTask;
     private int $startTime;
     private ClosureTask $showTask;
+    private ClosureTask $gameTask;
 
-    public function __construct(private int $id, private Team $blue, private Team $red, private int $count_max)
+    public function __construct(private int $id, private Team $blue, private Team $red, private int $countMax)
     {
         $this->startTime = time() + 60;
         $this->timeoutTask = new ClosureTask(function (): void {
@@ -69,7 +71,7 @@ final class Game
      */
     public function getCountMax(): int
     {
-        return $this->count_max;
+        return $this->countMax;
     }
 
     public function getCount(): int
@@ -114,8 +116,15 @@ final class Game
         Core::getInstance()->getDB()->query("UPDATE Games SET started=1 WHERE id=$this->id;");
         $this->started = true;
         $map = MapsHandler::getRandomMap();
-        $this->worldName = $map?->duplicate($this->id);
-        $this->world = Core::getInstance()->getServer()->getWorldManager()->getWorldByName($this->worldName);
+        $worldName = $map?->duplicate($this->id);
+        $this->world = (function() use ($worldName): ?World {
+            foreach (Core::getInstance()->getServer()->getWorldManager()->getWorlds() as $world){
+                if($world->getFolderName() === $worldName){
+                    return $world;
+                }
+            }
+            return null;
+        })();
         $this->points = $map?->getPoints();
         if (!$this->world) {
             Core::getInstance()->getLogger()->error("[$this->id] Error while duplicating map !");
@@ -180,10 +189,20 @@ final class Game
         $this->getRed()->getBossBar()->addPlayers($players);
         $this->getBlue()->getBossBar()->addPlayers($players);
         $this->gameTask = new ClosureTask(function (): void {
-            $this->getRed()->updateBossBar();
-            $this->getBlue()->updateBossBar();
+            if($this->getRed()->getScore() >= 100){
+                $this->stop();
+                $this->gameTask->getHandler()?->cancel();
+            }
+            else if($this->getBlue()->getScore() >= 100){
+                $this->stop();
+                $this->gameTask->getHandler()?->cancel();
+            }
+            else {
+                $this->getRed()->updateBossBar();
+                $this->getBlue()->updateBossBar();   
+            }
         });
-        Core::getInstance()->getScheduler()->scheduleRepeatingTask($this->gameTask, 10);
+        Core::getInstance()->getScheduler()->scheduleRepeatingTask($this->gameTask, 5);
     }
 
     public function stop(): void

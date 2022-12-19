@@ -19,7 +19,7 @@ final class Team
      * @var string[]
      */
     private array $players;
-    private ?Position $spawnpoint = null;
+    private ?Position $spawnPoint = null;
     private BossBar $bossBar;
     private int $score = 0;
 
@@ -84,11 +84,11 @@ final class Team
     }
 
     /**
-     * @param Position $spawnpoint
+     * @param Position $spawnPoint
      */
-    public function setSpawnPoint(Position $spawnpoint): void
+    public function setSpawnPoint(Position $spawnPoint): void
     {
-        $this->spawnpoint = $spawnpoint;
+        $this->spawnPoint = $spawnPoint;
     }
 
     /**
@@ -96,7 +96,7 @@ final class Team
      */
     public function getSpawnPoint(): ?Position
     {
-        return $this->spawnpoint;
+        return $this->spawnPoint;
     }
 
     public function addPlayer(string $player): void
@@ -110,10 +110,9 @@ final class Team
      */
     public function teleportToSpawn(string...$players): void
     {
-        var_dump($this->spawnpoint->world->getDisplayName(), $this->spawnpoint->world->getFolderName());
         foreach ($players as $name) {
             $player = Core::getInstance()->getServer()->getPlayerByPrefix($name);
-            $player->teleport($this->spawnpoint);
+            $player->teleport($this->spawnPoint);
         }
     }
 

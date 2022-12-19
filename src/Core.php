@@ -2,11 +2,13 @@
 
 namespace Ordness\CTP;
 
+use czechpmdevs\multiworld\util\WorldUtils;
 use MySQLi;
 use Ordness\CTP\handlers\MapsHandler;
 use Ordness\CTP\listeners\PlayerListener;
 use Ordness\CTP\tasks\GameChecker;
 use pocketmine\plugin\PluginBase;
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\SingletonTrait;
 
 class Core extends PluginBase
@@ -20,8 +22,14 @@ class Core extends PluginBase
         $this::setInstance($this);
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
         if($this->getDB()->ping()) $this->initDB();
-        $this->getScheduler()->scheduleRepeatingTask(new GameChecker(), 10*20);
+        $this->getScheduler()->scheduleTask(new ClosureTask(function (){
+            foreach(WorldUtils::getAllWorlds() as $world){
+                if(!str_starts_with($world, 'ctp-')) continue;
+                WorldUtils::removeWorld($world);
+            }
+        }));
         MapsHandler::loadMaps();
+        $this->getScheduler()->scheduleRepeatingTask(new GameChecker(), 10*20);
     }
 
     /**
